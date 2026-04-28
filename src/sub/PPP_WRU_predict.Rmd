@@ -1,0 +1,375 @@
+---
+title: "PPP WRU Prediction"
+author: "Weiran"
+output: html_document
+---
+
+## Setup - Run in console
+
+```{r setup_wru, message=FALSE, warning=FALSE}
+# Required packages
+required_pkgs <- c(
+  "readr", "dplyr", "stringr", "purrr", "wru",
+  "future", "future.callr", "haven"
+)
+
+missing_pkgs <- required_pkgs[!vapply(required_pkgs, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
+if (length(missing_pkgs) > 0) {
+  options(timeout = 600)
+  install.packages(missing_pkgs, repos = "https://cloud.r-project.org")
+}
+
+still_missing <- required_pkgs[!vapply(required_pkgs, requireNamespace, quietly = TRUE, FUN.VALUE = logical(1))]
+if (length(still_missing) > 0) {
+  stop(paste("Missing required R packages:", paste(still_missing, collapse = ", ")))
+}
+
+library(readr)
+library(dplyr)
+library(stringr)
+library(purrr)
+library(wru)
+library(future)
+library(future.callr)
+library(haven)
+
+# Parallel backend
+future::plan(future.callr::callr)
+
+# Find project root by walking up until we find Data/
+.dir <- getwd()
+while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
+  .dir <- dirname(.dir)
+}
+parent_dir <- .dir
+
+# PPP step-style dataset names
+input_file <- "PPP_wru_interim.dta"
+output_file <- "PPP_wru_interim_prediction.dta"
+
+# Optional manual overrides
+name_col_override <- NULL
+state_col_override <- NULL
+zip_col_override <- NULL
+race_col_override <- NULL
+```
+
+```{r load_data, message=FALSE, warning=FALSE}
+# Read WRU interim file from clean step
+in_path <- file.path(parent_dir, "Data", input_file)
+raw_df <- NULL
+
+if (file.exists(in_path)) {
+  raw_df <- haven::read_dta(in_path)
+} else {
+  csv_fallback <- file.path(parent_dir, "Data", "PPP_clean.csv")
+  dta_fallback <- file.path(parent_dir, "Data", "PPP_clean.dta")
+
+  if (file.exists(csv_fallback)) {
+    message("PPP_wru_interim.dta not found; using fallback PPP_clean.csv and creating interim id.")
+    raw_df <- readr::read_csv(csv_fallback, show_col_types = FALSE)
+  } else if (file.exists(dta_fallback)) {
+    message("PPP_wru_interim.dta not found; using fallback PPP_clean.dta and creating interim id.")
+    raw_df <- haven::read_dta(dta_fallback)
+  } else {
+    stop(paste0(
+      "Input file not found: ", in_path,
+      "\nFallback files also missing: ", csv_fallback, " and ", dta_fallback
+    ))
+  }
+
+  if (!"id" %in% names(raw_df)) {
+    raw_df <- raw_df %>% dplyr::mutate(id = dplyr::row_number())
+  }
+
+  haven::write_dta(raw_df, in_path)
+  message("Wrote fallback interim file: ", in_path)
+}
+
+cat("Rows:", nrow(raw_df), " Columns:", ncol(raw_df), "\n")
+cat("Column names:\n")
+print(names(raw_df))
+cat("\nPreview:\n")
+print(utils::head(raw_df, 5))
+```
+
+```{r detect_columns, message=FALSE, warning=FALSE}
+normalize_name <- function(x) {
+  stringr::str_to_lower(gsub("[^a-z0-9]", "", x))
+}
+
+pick_column <- function(df, override, candidates, label) {
+  if (!is.null(override)) {
+    if (!override %in% names(df)) {
+      stop(sprintf("Override for %s not found: %s", label, override))
+    }
+    return(override)
+  }
+
+  nms <- names(df)
+  norm <- normalize_name(nms)
+  cand_norm <- unique(normalize_name(candidates))
+
+  exact_idx <- match(cand_norm, norm)
+  exact_idx <- exact_idx[!is.na(exact_idx)]
+  if (length(exact_idx) > 0) return(nms[exact_idx[1]])
+
+  # Fallback: partial contains match
+  for (pat in cand_norm) {
+    hit <- which(stringr::str_detect(norm, pat))
+    if (length(hit) > 0) return(nms[hit[1]])
+  }
+
+  NULL
+}
+
+name_col <- pick_column(
+  raw_df,
+  name_col_override,
+  c("BorrowerName", "name", "full_name", "fullname", "applicant_name", "owner_name"),
+  "name"
+)
+
+state_col <- pick_column(
+  raw_df,
+  state_col_override,
+  c("state", "BorrowerState", "st", "state_cd", "statecode"),
+  "state"
+)
+
+zip_col <- pick_column(
+  raw_df,
+  zip_col_override,
+  c("BorrowerZip", "zip", "zipcode", "zip_code", "zcta", "zcta5"),
+  "zip"
+)
+
+race_col <- pick_column(
+  raw_df,
+  race_col_override,
+  c("Race", "race", "self_reported_race", "Race_Ethnicity_Simple"),
+  "race"
+)
+
+surname_col <- pick_column(
+  raw_df,
+  NULL,
+  c("surname", "last_name", "lastname"),
+  "surname"
+)
+
+if (is.null(state_col) || is.null(zip_col) || (is.null(surname_col) && is.null(name_col))) {
+  stop(paste(
+    "No usable name/surname, state, or zip columns found.",
+    "Detected:",
+    paste0("name_col=", ifelse(is.null(name_col), "NULL", name_col)),
+    paste0("surname_col=", ifelse(is.null(surname_col), "NULL", surname_col)),
+    paste0("state_col=", ifelse(is.null(state_col), "NULL", state_col)),
+    paste0("zip_col=", ifelse(is.null(zip_col), "NULL", zip_col))
+  ))
+}
+
+cat("Detected columns:\n")
+cat("  surname_col:", ifelse(is.null(surname_col), "<derive from name>", surname_col), "\n")
+cat("  name_col:", ifelse(is.null(name_col), "<none>", name_col), "\n")
+cat("  state_col:", state_col, "\n")
+cat("  zip_col:", zip_col, "\n")
+cat("  race_col:", ifelse(is.null(race_col), "<none>", race_col), "\n")
+```
+
+```{r clean_fields, message=FALSE, warning=FALSE}
+# Stable id (preserve existing id if present)
+if ("id" %in% names(raw_df)) {
+  work_df <- raw_df %>%
+    dplyr::mutate(id = as.integer(id))
+} else {
+  work_df <- raw_df %>%
+    dplyr::mutate(id = dplyr::row_number())
+}
+
+# State cleaning: handle abbreviation / full name / FIPS
+orig_state <- stringr::str_trim(as.character(work_df[[state_col]]))
+state_std <- toupper(wru::as_state_abbreviation(orig_state))
+
+invalid_state_mask <- is.na(state_std) | !stringr::str_detect(state_std, "^[A-Z]{2}$")
+invalid_state_values <- sort(unique(orig_state[invalid_state_mask & !is.na(orig_state) & orig_state != ""]))
+
+if (length(invalid_state_values) > 0) {
+  cat("Invalid/unmapped state values (up to 50 shown):\n")
+  print(utils::head(invalid_state_values, 50))
+}
+
+work_df <- work_df %>%
+  dplyr::mutate(state = dplyr::if_else(
+    !is.na(state_std) & stringr::str_detect(state_std, "^[A-Z]{2}$"),
+    state_std,
+    NA_character_
+  ))
+
+# ZIP/ZCTA cleaning
+zip_raw <- stringr::str_trim(as.character(work_df[[zip_col]]))
+zip_digits <- stringr::str_remove_all(zip_raw, "[^0-9]")
+zip_norm_name <- normalize_name(zip_col)
+
+if (zip_norm_name %in% c("zcta", "zcta5")) {
+  zcta <- dplyr::case_when(
+    zip_digits == "" ~ NA_character_,
+    nchar(zip_digits) <= 5 ~ stringr::str_pad(zip_digits, width = 5, side = "left", pad = "0"),
+    TRUE ~ substr(zip_digits, 1, 5)
+  )
+} else {
+  zcta <- dplyr::case_when(
+    nchar(zip_digits) >= 5 ~ substr(zip_digits, 1, 5),
+    nchar(zip_digits) > 0 ~ stringr::str_pad(zip_digits, width = 5, side = "left", pad = "0"),
+    TRUE ~ NA_character_
+  )
+}
+
+zcta[!stringr::str_detect(zcta, "^[0-9]{5}$")] <- NA_character_
+work_df$zcta <- zcta
+
+cat("Rows with missing/invalid zcta after cleaning:", sum(is.na(work_df$zcta)), "\n")
+
+# Surname cleaning/derivation
+if (!is.null(surname_col)) {
+  surname <- as.character(work_df[[surname_col]])
+  surname <- stringr::str_squish(stringr::str_trim(surname))
+} else {
+  full_name <- as.character(work_df[[name_col]])
+  full_name <- stringr::str_squish(stringr::str_trim(full_name))
+
+  # Remove one common suffix at the end for transparency
+  full_name <- stringr::str_replace(
+    full_name,
+    regex("[,\\s]+(JR|SR|II|III|IV|V|MD|PHD|ESQ|CPA|DDS|DMD)\\.?$", ignore_case = TRUE),
+    ""
+  )
+
+  pieces <- stringr::str_split(full_name, "\\s+")
+  surname <- purrr::map_chr(pieces, function(x) {
+    if (length(x) == 0) return(NA_character_)
+    x[length(x)]
+  })
+}
+
+surname <- stringr::str_squish(stringr::str_trim(surname))
+surname[surname == ""] <- NA_character_
+work_df$surname <- surname
+
+cat("Rows with missing/empty surname:", sum(is.na(work_df$surname)), "\n")
+```
+
+```{r run_wru_state_loop, message=FALSE, warning=FALSE}
+# Build WRU input
+wru_input <- work_df %>%
+  dplyr::transmute(id, surname, state, zcta)
+
+n_total <- nrow(wru_input)
+n_bad_surname <- sum(is.na(wru_input$surname) | wru_input$surname == "")
+n_bad_state <- sum(is.na(wru_input$state) | !stringr::str_detect(wru_input$state, "^[A-Z]{2}$"))
+n_bad_zcta <- sum(is.na(wru_input$zcta) | !stringr::str_detect(wru_input$zcta, "^[0-9]{5}$"))
+
+wru_input_clean <- wru_input %>%
+  dplyr::filter(
+    !is.na(surname), surname != "",
+    !is.na(state), stringr::str_detect(state, "^[A-Z]{2}$"),
+    !is.na(zcta), stringr::str_detect(zcta, "^[0-9]{5}$")
+  )
+
+cat("Removed rows (surname):", n_bad_surname, "\n")
+cat("Removed rows (state):", n_bad_state, "\n")
+cat("Removed rows (zcta):", n_bad_zcta, "\n")
+cat("Rows sent to WRU:", nrow(wru_input_clean), "\n")
+
+pred_cols <- c("pred_whi", "pred_bla", "pred_his", "pred_asi", "pred_oth")
+
+if (nrow(wru_input_clean) == 0) {
+  warning("No valid rows remain after cleaning. Writing empty prediction step file.")
+  prediction_step <- wru_input_clean
+  for (pc in pred_cols) prediction_step[[pc]] <- numeric()
+} else {
+  states <- sort(unique(wru_input_clean$state))
+  cat("States to score:", paste(states, collapse = ", "), "\n")
+
+  state_results <- purrr::map(states, function(st) {
+    message(sprintf("Scoring state %s ...", st))
+
+    tryCatch({
+      df_state <- wru_input_clean %>%
+        dplyr::filter(state == st) %>%
+        dplyr::select(id, surname, state, zcta)
+
+      census_st <- wru::get_census_data(states = st, census.geo = "zcta", year = "2020")
+
+      pred_st <- wru::predict_race(
+        voter.file = df_state,
+        census.geo = "zcta",
+        census.data = census_st,
+        names.to.use = "surname",
+        impute.missing = TRUE,
+        skip_bad_geos = TRUE
+      )
+
+      # Normalize WRU prediction column names
+      names(pred_st) <- names(pred_st) %>%
+        stringr::str_replace_all("\\.", "_")
+
+      for (pc in pred_cols) {
+        if (!pc %in% names(pred_st)) pred_st[[pc]] <- NA_real_
+      }
+
+      pred_st %>%
+        dplyr::select(id, surname, state, zcta, dplyr::all_of(pred_cols))
+    }, error = function(e) {
+      warning(sprintf("State %s failed: %s", st, e$message))
+      NULL
+    })
+  })
+
+  prediction_step <- dplyr::bind_rows(state_results)
+
+  if (nrow(prediction_step) == 0) {
+    warning("All state loops failed or returned no predictions.")
+    prediction_step <- wru_input_clean
+    for (pc in pred_cols) prediction_step[[pc]] <- NA_real_
+    prediction_step <- prediction_step %>% dplyr::slice(0)
+  }
+}
+
+if (nrow(prediction_step) > 0) {
+  prediction_step <- prediction_step %>%
+    dplyr::mutate(
+      surname = toupper(stringr::str_squish(as.character(surname))),
+      zcta5 = as.character(zcta),
+      zcta5 = stringr::str_remove_all(zcta5, "[^0-9]"),
+      zcta5 = dplyr::case_when(
+        nchar(zcta5) >= 5 ~ substr(zcta5, 1, 5),
+        nchar(zcta5) > 0 ~ stringr::str_pad(zcta5, width = 5, side = "left", pad = "0"),
+        TRUE ~ NA_character_
+      )
+    )
+} else {
+  prediction_step$zcta5 <- character()
+}
+
+# Save step-style WRU predictions
+out_step_path <- file.path(parent_dir, "Data", output_file)
+zipcode_export <- prediction_step %>%
+  dplyr::select(zcta5, surname, dplyr::all_of(pred_cols))
+haven::write_dta(zipcode_export, out_step_path)
+
+# Merge-back for reporting only
+scored_ids <- unique(prediction_step$id)
+rows_scored <- sum(work_df$id %in% scored_ids)
+rows_not_scored <- nrow(work_df) - rows_scored
+
+cat("\nTotal input rows:", nrow(work_df), "\n")
+cat("Rows successfully scored:", rows_scored, "\n")
+cat("Rows not scored:", rows_not_scored, "\n")
+cat("Prediction columns:", paste(pred_cols, collapse = ", "), "\n")
+cat("Saved output file:", out_step_path, "\n")
+```
+
+```{r validation_optional, message=FALSE, warning=FALSE}
+cat("Validation summary step skipped.\n")
+```

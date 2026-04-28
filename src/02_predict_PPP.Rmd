@@ -1,0 +1,33 @@
+---
+title: "PPP Prediction"
+author: "Weiran"
+output: html_document
+---
+
+## Setup - Run in console
+
+
+```{r setup, message=FALSE, warning=FALSE}
+# Load required libraries (make sure to install these first manually in the Console)
+library(rmarkdown)
+library(here)
+```
+
+
+
+```{r, message=FALSE, warning=FALSE}
+# works whether current wd is project root or src
+if (basename(getwd()) == "src") {
+  parent_dir <- dirname(getwd())
+} else {
+  parent_dir <- getwd()
+}
+
+# codes should be parent_dir/src
+codes <- file.path(parent_dir, "src")
+
+render(file.path(codes, "sub", "PPP_last_name_predict.Rmd"))
+render(file.path(codes, "sub", "PPP_WRU_predict.Rmd"))
+render(file.path(codes, "sub", "PPP_BIFSG_predict.Rmd"))
+render(file.path(codes, "sub", "PPP_birdie_predict.Rmd"))
+```

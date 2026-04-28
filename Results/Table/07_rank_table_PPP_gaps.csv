@@ -1,0 +1,7 @@
+group,Metric,Last Name,ZIP,BISG,BIFSG,ZRP,NamePrism,BIRDiE
+Racial Gaps (vs. Ground Truth),Black-White,6,7,5,4,3,8,1
+Racial Gaps (vs. Ground Truth),Black-Hispanic,2,3,6,8,4,5,1
+Racial Gaps (vs. Ground Truth),Black-Asian,2,6,7,5,1,8,4
+Racial Gaps (vs. Ground Truth),Hispanic-White,3,1,4,6,5,7,2
+Racial Gaps (vs. Ground Truth),Hispanic-Asian,1,2,5,7,8,4,3
+Racial Gaps (vs. Ground Truth),Asian-White,6,3,1,2,7,8,5

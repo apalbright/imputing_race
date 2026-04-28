@@ -1,0 +1,19 @@
+group,Metric,Last Name,ZIP,BISG,BIFSG,ZRP,NamePrism,BIRDiE
+F1 by Race,White,5,4,2,1,3,6,--
+F1 by Race,Black,5,4,3,1,2,6,--
+F1 by Race,Hispanic,1,5,4,2,3,6,--
+F1 by Race,Asian,1,5,3,2,4,6,--
+F1 Aggregated,F1 Micro,4,5,2,1,3,6,--
+F1 Aggregated,F1 Macro,4,5,2,1,3,6,--
+F1 Aggregated,F1 Weighted,4,5,2,1,3,6,--
+Racial Gaps (vs. Ground Truth),Black-White,6,7,5,4,3,8,1
+Racial Gaps (vs. Ground Truth),Black-Hispanic,2,3,6,8,4,5,1
+Racial Gaps (vs. Ground Truth),Black-Asian,2,6,7,5,1,8,4
+Racial Gaps (vs. Ground Truth),Hispanic-White,3,1,4,6,5,7,2
+Racial Gaps (vs. Ground Truth),Hispanic-Asian,1,2,5,7,8,4,3
+Racial Gaps (vs. Ground Truth),Asian-White,6,3,1,2,7,8,5
+Population Accuracy,Pop: White,5,4,3,2,1,6,--
+Population Accuracy,Pop: Black,5,4,3,1,2,6,--
+Population Accuracy,Pop: Hispanic,1,6,2,3,4,5,--
+Population Accuracy,Pop: Asian,3,6,1,2,5,4,--
+Population Accuracy,Distance,5,4,3,1,2,6,--

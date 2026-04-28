@@ -1,0 +1,4 @@
+nameparser
+numpy
+pandas
+requests

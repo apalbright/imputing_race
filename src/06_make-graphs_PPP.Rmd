@@ -1,0 +1,220 @@
+---
+title: "Make PPP race imputation graphs"
+output: html_notebook
+---
+
+```{r setup, message=FALSE, warning=FALSE}
+library(ggthemes)
+library(tidyverse)
+library(grafify)
+library(patchwork)
+
+.dir <- getwd()
+while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
+  .dir <- dirname(.dir)
+}
+parent_dir <- .dir
+plots_dir <- file.path(parent_dir, "Results", "Plots")
+figs_dir <- file.path(plots_dir, "Figs")
+dir.create(figs_dir, recursive = TRUE, showWarnings = FALSE)
+
+bw_clean <- function(base_size = 16) {
+  theme_bw(base_size = base_size) +
+    theme(
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      legend.position = "bottom",
+      axis.text = element_text(family = "Palatino"),
+      axis.title = element_text(family = "Palatino"),
+      legend.text = element_text(family = "Palatino"),
+      legend.title = element_text(family = "Palatino"),
+      strip.text = element_text(family = "Palatino"),
+      legend.background = element_rect(color = NA),
+      panel.grid.major.x = element_blank(),
+      panel.grid.major.y = element_line(
+        color = "grey80",
+        linetype = "dotted",
+        linewidth = 0.5
+      ),
+      panel.grid.minor = element_blank(),
+      axis.ticks = element_line(color = "black", linewidth = 0.5),
+      axis.ticks.length = unit(0.15, "cm"),
+      panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.background = element_rect(fill = "white", color = NA),
+      legend.box.spacing = unit(0, "pt"),
+      legend.margin = margin(t = 0, b = 0)
+    )
+}
+
+```
+
+# F1
+
+```{r f1_plots, message=FALSE, warning=FALSE}
+f1_race_df <- readr::read_csv(file.path(plots_dir, "PPP_04_F1_race.csv"), show_col_types = FALSE) %>%
+  pivot_longer(cols = White:Other, names_to = "race", values_to = "f1")
+
+f1_race_plot <- f1_race_df %>%
+  mutate(
+    Method = factor(Method, levels = c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")),
+    race = factor(race, levels = c("White", "Black", "Hispanic", "Asian", "Other")),
+    f1 = f1 / 100
+  ) %>%
+  ggplot(aes(x = Method, y = f1, fill = Method, color = Method)) +
+  geom_col(width = 0.8) +
+  facet_grid(~ race) +
+  labs(x = "", y = "F1") +
+  scale_fill_grafify("kelly", name = "Method") +
+  scale_color_grafify("kelly", name = "Method") +
+  scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
+  bw_clean()
+
+f1_agg_df <- readr::read_csv(file.path(plots_dir, "PPP_05_F1_aggregated.csv"), show_col_types = FALSE) %>%
+  pivot_longer(cols = Weighted:Macro, names_to = "weights", values_to = "f1")
+
+f1_agg_plot <- f1_agg_df %>%
+  mutate(
+    Method = factor(Method, levels = c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")),
+    weights = factor(weights, levels = c("Weighted", "Micro", "Macro")),
+    f1 = f1 / 100
+  ) %>%
+  ggplot(aes(x = Method, y = f1, fill = Method, color = Method)) +
+  geom_col(width = 0.8) +
+  facet_grid(~ weights) +
+  labs(x = "", y = "Aggregated F1") +
+  scale_fill_grafify("kelly", name = "Method") +
+  scale_color_grafify("kelly", name = "Method") +
+  scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
+  bw_clean()
+
+f1_combined <- f1_race_plot / f1_agg_plot + plot_layout(heights = c(2, 1))
+
+ggsave(file.path(figs_dir, "PPP_04_F1_race.png"), f1_race_plot, width = 9, height = 5, dpi = 200)
+ggsave(file.path(figs_dir, "PPP_05_F1_aggregated.png"), f1_agg_plot, width = 9, height = 5, dpi = 200)
+ggsave(file.path(figs_dir, "PPP_F1s.png"), f1_combined, width = 9, height = 9, dpi = 200)
+```
+
+# Gaps
+
+```{r gap_plot, message=FALSE, warning=FALSE}
+gap_df <- readr::read_csv(file.path(plots_dir, "PPP_07_all_gaps.csv"), show_col_types = FALSE) %>%
+  pivot_longer(
+    cols = Black_White:Asian_White,
+    names_to = "gap",
+    values_to = "diff"
+  )
+
+gap_method_levels <- c("Real", "Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism", "BIRDiE")
+gap_axis_step <- 5
+gap_axis_limits <- c(
+  floor(min(gap_df$diff, na.rm = TRUE) / gap_axis_step) * gap_axis_step,
+  ceiling(max(gap_df$diff, na.rm = TRUE) / gap_axis_step) * gap_axis_step
+)
+
+gap_plot <- gap_df %>%
+  mutate(
+    Method = factor(Method, levels = gap_method_levels),
+    gap = factor(
+      gap,
+      levels = c(
+        "Black_White", "Hispanic_White", "Asian_White",
+        "Black_Hispanic", "Black_Asian", "Hispanic_Asian"
+      ),
+      labels = c(
+        "Black-White", "Hispanic-White", "Asian-White",
+        "Black-Hispanic", "Black-Asian", "Hispanic-Asian"
+      )
+    )
+  ) %>%
+  ggplot(aes(x = Method, y = diff)) +
+  geom_col(
+    data = . %>% filter(Method != "Real"),
+    aes(fill = Method, color = Method),
+    width = 0.8
+  ) +
+  geom_hline(
+    data = . %>% filter(Method == "Real"),
+    aes(yintercept = diff),
+    linetype = "dashed",
+    color = "black",
+    linewidth = 1
+  ) +
+  facet_grid(~ gap) +
+  labs(x = "", y = "Gap in Percentage Points") +
+  scale_fill_grafify("kelly", name = "Method") +
+  scale_color_grafify("kelly", name = "Method") +
+  scale_y_continuous(
+    breaks = seq(gap_axis_limits[1], gap_axis_limits[2], gap_axis_step),
+    limits = gap_axis_limits
+  ) +
+  guides(fill = guide_legend(nrow = 1), color = guide_legend(nrow = 1)) +
+  bw_clean() +
+  theme(
+    legend.text = element_text(size = 11, family = "Palatino"),
+    legend.title = element_text(size = 11, family = "Palatino"),
+    legend.key.size = unit(0.5, "cm"),
+    legend.spacing.x = unit(3, "pt")
+  )
+
+ggsave(file.path(figs_dir, "PPP_07_all_gaps.png"), gap_plot, width = 9.5, height = 5.2, dpi = 200)
+```
+
+# Population
+
+```{r population_plots, message=FALSE, warning=FALSE}
+population_df <- readr::read_csv(file.path(plots_dir, "PPP_08_population.csv"), show_col_types = FALSE) %>%
+  pivot_longer(cols = White:Other, names_to = "race", values_to = "rate")
+
+population_axis_step <- 10
+population_axis_limits <- c(
+  0,
+  ceiling(max(population_df$rate, na.rm = TRUE) / population_axis_step) * population_axis_step
+)
+
+population_plot <- population_df %>%
+  mutate(
+    Method = factor(Method, levels = c("Real", "Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")),
+    race = factor(race, levels = c("White", "Black", "Hispanic", "Asian", "Other"))
+  ) %>%
+  ggplot(aes(x = Method, y = rate)) +
+  geom_col(
+    data = . %>% filter(Method != "Real"),
+    aes(fill = Method, color = Method),
+    width = 0.8
+  ) +
+  geom_hline(
+    data = . %>% filter(Method == "Real"),
+    aes(yintercept = rate),
+    linetype = "dashed",
+    color = "black",
+    linewidth = 1
+  ) +
+  facet_grid(~ race) +
+  labs(x = "", y = "Percent of the Population (%)") +
+  scale_fill_grafify("kelly", name = "Method") +
+  scale_color_grafify("kelly", name = "Method") +
+  scale_y_continuous(
+    breaks = seq(population_axis_limits[1], population_axis_limits[2], population_axis_step),
+    limits = population_axis_limits
+  ) +
+  bw_clean()
+
+distance_plot <- population_df %>%
+  select(Method, Distance) %>%
+  distinct() %>%
+  drop_na() %>%
+  mutate(Method = factor(Method, levels = c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism"))) %>%
+  ggplot(aes(x = Method, y = Distance, fill = Method, color = Method)) +
+  geom_col(width = 0.8) +
+  labs(x = "", y = "Distance from Observed Demographics") +
+  scale_fill_grafify("kelly", name = "Method") +
+  scale_color_grafify("kelly", name = "Method") +
+  bw_clean()
+
+population_combined <- population_plot / distance_plot + plot_layout(heights = c(2, 1))
+
+ggsave(file.path(figs_dir, "PPP_08_population.png"), population_plot, width = 9, height = 5, dpi = 200)
+ggsave(file.path(figs_dir, "PPP_08b_population_distance.png"), distance_plot, width = 9, height = 5, dpi = 200)
+ggsave(file.path(figs_dir, "PPP_population.png"), population_combined, width = 9, height = 9, dpi = 200)
+```

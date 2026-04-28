@@ -1,0 +1,37 @@
+---
+title: "PPP Last Name Prediction"
+author: "Weiran"
+output: html_document
+---
+
+## Setup - Run in console
+#install.packages('haven')
+#install.packages('predictrace')
+
+```{r setup_lastname_ppp, message=FALSE, warning=FALSE}
+# Load required libraries (make sure to install these first manually in the Console)
+options(timeout = 600)
+repos <- c(CRAN = "https://packagemanager.posit.co/cran/latest")
+
+# Find project root by walking up until we find the Data directory
+.dir <- getwd()
+while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
+  .dir <- dirname(.dir)
+}
+parent_dir <- .dir
+
+install.packages("remotes", repos = repos)
+remotes::install_version("haven", version = "2.5.4", repos = repos, type = "source", upgrade = "never")
+if (!requireNamespace("foreign", quietly = TRUE)) install.packages("foreign", repos = repos)
+remotes::install_version("predictrace", version = "2.0.1", repos = repos, type = "source", upgrade = "never")
+```
+
+```{r lastname_predict_ppp, message=FALSE, warning=FALSE}
+data <- haven::read_dta(file.path(parent_dir, "Data", "lastname_interim_PPP.dta"))
+
+results <- predictrace::predict_race(data$lastname, probability = FALSE, surname = TRUE)
+names(results)[names(results) == "name"] <- "lastname"
+
+results[results == ""] <- NA
+haven::write_dta(results, file.path(parent_dir, "Data", "results_interim_lastname_PPP.dta"))
+```

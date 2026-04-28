@@ -1,0 +1,93 @@
+---
+title: "PPP Birdie BISG Prediction"
+author: "Weiran"
+output: html_document
+---
+
+## Setup - Run in console
+#install.packages(c("here", "remotes", "birdie", "haven", "foreign"))
+#remotes::install_github("CoryMcCartan/birdie")
+
+```{r setup_birdie, message=FALSE, warning=FALSE}
+# Load required libraries (make sure to install these first manually in the Console)
+options(timeout = 600)
+repos <- c(CRAN = "https://packagemanager.posit.co/cran/latest")
+# Find project root by walking up until we find the Data directory
+.dir <- getwd()
+while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
+  .dir <- dirname(.dir)
+}
+parent_dir <- .dir
+install.packages("remotes", repos = repos)
+remotes::install_version("haven", version = "2.5.4", repos = repos, type = "source", upgrade = "never")
+if (!requireNamespace("foreign", quietly = TRUE)) install.packages("foreign", repos = repos)
+remotes::install_version("birdie", version = "0.6.1", repos = repos, type = "source", upgrade = "never")
+remotes::install_version("dplyr", version = "1.1.4", repos = repos, type = "source", upgrade = "never")
+remotes::install_version("remotes", version = "2.5.0", repos = repos, type = "source", upgrade = "never")
+library(birdie)
+```
+
+
+
+```{r birdie_predict, message=FALSE, warning=FALSE}
+# Load voter data using relative path (recommended)
+datazip <- haven::read_dta(file.path(parent_dir, "Data", "PPP_birdie_interim.dta"))
+
+datazip$surnameUPPER <- toupper(datazip$surname)
+datazip$zipcode_fct <- as.factor(datazip$zipcode)
+datazip$surname_fct <- as.factor(datazip$surnameUPPER)
+datazip$fintech_fct <- as.factor(datazip$fintech_reg)
+
+r_probs <- birdie::bisg(~ nm(surname_fct) + zip(zipcode_fct), data = datazip)
+
+fit <- birdie::birdie(r_probs, fintech_fct ~ proc_zip(zipcode_fct), data = datazip)
+
+# Extract matrix
+mat <- fit$map
+
+# Optional: set names if not already present
+if (nrow(mat) == 2) {
+  dimnames(mat) <- list(c("nonfintech", "fintech"), colnames(mat))
+}
+
+# Now compute gaps for fintech group
+black_white     <- mat["fintech", "black"] - mat["fintech", "white"]
+black_hisp      <- mat["fintech", "black"] - mat["fintech", "hisp"]
+black_asian     <- mat["fintech", "black"] - mat["fintech", "asian"]
+hisp_white      <- mat["fintech", "hisp"]  - mat["fintech", "white"]
+hisp_asian      <- mat["fintech", "hisp"]  - mat["fintech", "asian"]
+asian_white     <- mat["fintech", "asian"] - mat["fintech", "white"]
+
+# Print all results
+gaps <- c(
+  "Black - White"     = black_white,
+  "Black - Hispanic"  = black_hisp,
+  "Black - Asian"     = black_asian,
+  "Hispanic - White"  = hisp_white,
+  "Hispanic - Asian"  = hisp_asian,
+  "Asian - White"     = asian_white
+)
+
+print(round(gaps, 3))
+
+gap_df <- data.frame(
+  gap_name = c("black_white",
+               "black_hispanic",
+               "black_asian",
+               "hispanic_white",
+               "hispanic_asian",
+               "asian_white"),
+  estimate = c(black_white,
+               black_hisp,
+               black_asian,
+               hisp_white,
+               hisp_asian,
+               asian_white)
+)
+
+haven::write_dta(gap_df, file.path(parent_dir, "Data", "PPP_birdie_prediction.dta"))
+
+
+
+```
+

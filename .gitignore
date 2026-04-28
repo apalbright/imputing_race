@@ -1,0 +1,12 @@
+*.log
+*.smcl
+*.html
+__pycache__/
+*.py[cod]
+.DS_Store
+.Rhistory
+.RData
+
+/Data/*
+!/Data/ZIP_TRACT_122025.xlsx
+!/Data/ZIP_TRACT_122025_bestres.dta

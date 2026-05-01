@@ -12,6 +12,7 @@ library(gt)
 METHODS <- c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")
 BIRDIE_METHODS <- "BIRDiE"
 NOT_APPLICABLE <- "--"
+DISPLAY_METHOD_LABELS <- c("Last Name" = "Surname", "ZIP" = "Zip")
 
 base_dir <- here::here()
 plots_dir <- file.path(base_dir, "Results", "Plots")
@@ -40,6 +41,10 @@ get_metric_value <- function(df, method, column) {
     return(NA_real_)
   }
   as.numeric(row[[column]][1])
+}
+
+display_method_names <- function(methods) {
+  unname(ifelse(methods %in% names(DISPLAY_METHOD_LABELS), DISPLAY_METHOD_LABELS[methods], methods))
 }
 
 # --- Step 1: Load data -------------------------------------------------------
@@ -119,10 +124,10 @@ rank_metric <- function(values, higher_better = TRUE, excluded = rep(FALSE, leng
 
   if (higher_better) {
     vals[is.na(vals)] <- -Inf
-    ranks <- rank(-vals, ties.method = "min")
+    ranks <- match(vals, sort(unique(vals), decreasing = TRUE))
   } else {
     vals[is.na(vals)] <- Inf
-    ranks <- rank(vals, ties.method = "min")
+    ranks <- match(vals, sort(unique(vals)))
   }
 
   result[included_idx] <- format_rank(ranks)
@@ -130,6 +135,8 @@ rank_metric <- function(values, higher_better = TRUE, excluded = rep(FALSE, leng
 }
 
 rank_gap_table <- function(methods, gaps_df, real_gaps_df) {
+  methods <- setdiff(methods, "Real")
+
   gap_cols <- names(gap_race_map)
   gap_labels <- c("Black-White", "Black-Hispanic", "Black-Asian",
                   "Hispanic-White", "Hispanic-Asian", "Asian-White")
@@ -299,12 +306,16 @@ for (k in seq_along(table_methods)) {
 result_df <- bind_rows(f1_race_ranked, f1_agg_ranked, gap_ranked, pop_ranked) %>%
   select(group, Metric, all_of(table_methods))
 
+display_table_methods <- display_method_names(table_methods)
+display_result_df <- result_df %>%
+  rename_with(display_method_names, all_of(table_methods))
+
 # --- Step 8a: Export as CSV ---------------------------------------------------
 
 table_dir <- file.path(base_dir, "Results", "Table")
 dir.create(table_dir, recursive = TRUE, showWarnings = FALSE)
 out_csv <- file.path(table_dir, "07_rank_table_PPP.csv")
-write_csv(result_df, out_csv)
+write_csv(display_result_df, out_csv)
 cat("CSV saved to:", out_csv, "\n")
 
 # --- Step 8b: Export as PNG via gt --------------------------------------------
@@ -313,8 +324,8 @@ figs_dir <- file.path(plots_dir, "Figs")
 dir.create(figs_dir, recursive = TRUE, showWarnings = FALSE)
 
 tbl <- build_gt_table(
-  result_df,
-  table_methods,
+  display_result_df,
+  display_table_methods,
   "**Rank-Order of Approaches**",
   "PPP Sample",
   paste0(

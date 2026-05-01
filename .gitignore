@@ -9,4 +9,4 @@ __pycache__/
 
 /Data/*
 !/Data/ZIP_TRACT_122025.xlsx
-!/Data/ZIP_TRACT_122025_bestres.dta
+!/Data/nhgis0002_ds267_20235_zcta.csv

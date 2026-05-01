@@ -18,6 +18,17 @@ plots_dir <- file.path(parent_dir, "Results", "Plots")
 figs_dir <- file.path(plots_dir, "Figs")
 dir.create(figs_dir, recursive = TRUE, showWarnings = FALSE)
 
+method_levels <- c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")
+method_labels <- c("Surname", "Zip", "BISG", "BIFSG", "ZRP", "NamePrism")
+
+birdie_method_levels <- c(method_levels, "BIRDiE")
+birdie_method_labels <- c(method_labels, "BIRDiE")
+
+one_row_method_legend <- guides(
+  fill = guide_legend(nrow = 1, byrow = TRUE),
+  color = guide_legend(nrow = 1, byrow = TRUE)
+)
+
 bw_clean <- function(base_size = 16) {
   theme_bw(base_size = base_size) +
     theme(
@@ -57,7 +68,7 @@ f1_race_df <- readr::read_csv(file.path(plots_dir, "PPP_04_F1_race.csv"), show_c
 
 f1_race_plot <- f1_race_df %>%
   mutate(
-    Method = factor(Method, levels = c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")),
+    Method = factor(Method, levels = method_levels),
     race = factor(race, levels = c("White", "Black", "Hispanic", "Asian", "Other")),
     f1 = f1 / 100
   ) %>%
@@ -65,9 +76,10 @@ f1_race_plot <- f1_race_df %>%
   geom_col(width = 0.8) +
   facet_grid(~ race) +
   labs(x = "", y = "F1") +
-  scale_fill_grafify("kelly", name = "Method") +
-  scale_color_grafify("kelly", name = "Method") +
+  scale_fill_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
+  scale_color_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
   scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
+  one_row_method_legend +
   bw_clean()
 
 f1_agg_df <- readr::read_csv(file.path(plots_dir, "PPP_05_F1_aggregated.csv"), show_col_types = FALSE) %>%
@@ -75,7 +87,7 @@ f1_agg_df <- readr::read_csv(file.path(plots_dir, "PPP_05_F1_aggregated.csv"), s
 
 f1_agg_plot <- f1_agg_df %>%
   mutate(
-    Method = factor(Method, levels = c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")),
+    Method = factor(Method, levels = method_levels),
     weights = factor(weights, levels = c("Weighted", "Micro", "Macro")),
     f1 = f1 / 100
   ) %>%
@@ -83,9 +95,10 @@ f1_agg_plot <- f1_agg_df %>%
   geom_col(width = 0.8) +
   facet_grid(~ weights) +
   labs(x = "", y = "Aggregated F1") +
-  scale_fill_grafify("kelly", name = "Method") +
-  scale_color_grafify("kelly", name = "Method") +
+  scale_fill_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
+  scale_color_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
   scale_y_continuous(breaks = seq(0, 1, 0.1), limits = c(0, 1)) +
+  one_row_method_legend +
   bw_clean()
 
 f1_combined <- f1_race_plot / f1_agg_plot + plot_layout(heights = c(2, 1))
@@ -105,7 +118,7 @@ gap_df <- readr::read_csv(file.path(plots_dir, "PPP_07_all_gaps.csv"), show_col_
     values_to = "diff"
   )
 
-gap_method_levels <- c("Real", "Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism", "BIRDiE")
+gap_method_levels <- c("Real", birdie_method_levels)
 gap_axis_step <- 5
 gap_axis_limits <- c(
   floor(min(gap_df$diff, na.rm = TRUE) / gap_axis_step) * gap_axis_step,
@@ -142,13 +155,13 @@ gap_plot <- gap_df %>%
   ) +
   facet_grid(~ gap) +
   labs(x = "", y = "Gap in Percentage Points") +
-  scale_fill_grafify("kelly", name = "Method") +
-  scale_color_grafify("kelly", name = "Method") +
+  scale_fill_grafify("kelly", name = "Method", breaks = birdie_method_levels, labels = birdie_method_labels) +
+  scale_color_grafify("kelly", name = "Method", breaks = birdie_method_levels, labels = birdie_method_labels) +
   scale_y_continuous(
     breaks = seq(gap_axis_limits[1], gap_axis_limits[2], gap_axis_step),
     limits = gap_axis_limits
   ) +
-  guides(fill = guide_legend(nrow = 1), color = guide_legend(nrow = 1)) +
+  one_row_method_legend +
   bw_clean() +
   theme(
     legend.text = element_text(size = 11, family = "Palatino"),
@@ -174,7 +187,7 @@ population_axis_limits <- c(
 
 population_plot <- population_df %>%
   mutate(
-    Method = factor(Method, levels = c("Real", "Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism")),
+    Method = factor(Method, levels = c("Real", method_levels)),
     race = factor(race, levels = c("White", "Black", "Hispanic", "Asian", "Other"))
   ) %>%
   ggplot(aes(x = Method, y = rate)) +
@@ -192,24 +205,26 @@ population_plot <- population_df %>%
   ) +
   facet_grid(~ race) +
   labs(x = "", y = "Percent of the Population (%)") +
-  scale_fill_grafify("kelly", name = "Method") +
-  scale_color_grafify("kelly", name = "Method") +
+  scale_fill_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
+  scale_color_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
   scale_y_continuous(
     breaks = seq(population_axis_limits[1], population_axis_limits[2], population_axis_step),
     limits = population_axis_limits
   ) +
+  one_row_method_legend +
   bw_clean()
 
 distance_plot <- population_df %>%
   select(Method, Distance) %>%
   distinct() %>%
   drop_na() %>%
-  mutate(Method = factor(Method, levels = c("Last Name", "ZIP", "BISG", "BIFSG", "ZRP", "NamePrism"))) %>%
+  mutate(Method = factor(Method, levels = method_levels)) %>%
   ggplot(aes(x = Method, y = Distance, fill = Method, color = Method)) +
   geom_col(width = 0.8) +
   labs(x = "", y = "Distance from Observed Demographics") +
-  scale_fill_grafify("kelly", name = "Method") +
-  scale_color_grafify("kelly", name = "Method") +
+  scale_fill_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
+  scale_color_grafify("kelly", name = "Method", breaks = method_levels, labels = method_labels) +
+  one_row_method_legend +
   bw_clean()
 
 population_combined <- population_plot / distance_plot + plot_layout(heights = c(2, 1))

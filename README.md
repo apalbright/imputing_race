@@ -12,6 +12,7 @@ This repository contains replication materials for the PPP extension of "Imputin
    - Link: https://data.sba.gov/dataset/ppp-foia
    - The raw PPP CSV files and `ppp-data-dictionary.xlsx` 
    - `src/00_clean_raw_PPP.py` merges these files, applies the keyword/person-name cleaning workflow, and writes `Data/PPP_person_names_final.csv`.
+   - The data source is backed up at [OSF](https://osf.io/bq7n8). You can download and put it in ./Data.
 
 2. **ZIP code-level race composition data**
    - The PPP ZIP benchmark requires `nhgis0002_ds267_20235_zcta.csv` in `Data/`.

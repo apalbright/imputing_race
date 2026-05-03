@@ -11,8 +11,8 @@ This repository contains replication materials for the PPP extension of "Imputin
    - Source: U.S. Small Business Administration (SBA) - Freedom of Information Act (FOIA) release
    - Link: https://data.sba.gov/dataset/ppp-foia
    - The raw PPP CSV files and `ppp-data-dictionary.xlsx` 
-   - `src/00_clean_raw_PPP.py` merges these files, applies the keyword/person-name cleaning workflow, and writes `Data/PPP_person_names_final.csv`.
-   - The data source is backed up at [OSF](https://osf.io/bq7n8). You can download and put it in ./Data.
+   - `src/00_clean_raw_PPP.py` merges these files, applies the keyword/person-name cleaning workflow, writes `Data/PPP_person_names_filtered.csv`, and then writes `Data/PPP_person_names_final.csv`.
+   - The data source is backed up at [OSF](https://osf.io/bq7n8). You can download and put it in ./Data/raw.
 
 2. **ZIP code-level race composition data**
    - The PPP ZIP benchmark requires `nhgis0002_ds267_20235_zcta.csv` in `Data/`.
@@ -27,7 +27,7 @@ All other files in `Data/` are cleaned and processed datasets.
 
 ### Instructions to replicate everything
 
-0. From the project root, run `python src/00_clean_raw_PPP.py` to merge raw PPP files, filter person names, parse borrower names, and write `Data/PPP_person_names_final.csv`
+0. From the project root, run `python src/00_clean_raw_PPP.py` to merge raw PPP files, filter person names, parse borrower names, and write `Data/PPP_person_names_filtered.csv` and `Data/PPP_person_names_final.csv`
 1. From the project root, run `do src/01_clean_prep_PPP.do` in Stata to set paths, clean the parsed PPP borrower file, and set up data for all imputation methods
 2. Run `src/02_predict_PPP.Rmd` to run all imputation methods that use R *(Last Name, WRU/BISG, BIFSG, BIRDiE)*
 3. To run *ZRP*,
@@ -40,7 +40,7 @@ All other files in `Data/` are cleaned and processed datasets.
    - run `python src/04_NamePrism_predict_PPP.py`
 5. From the project root, run `do src/05_merge_all_methods_PPP.do` in Stata to merge all imputation method results and yield PPP evaluation files in `Results/Plots`
 6. Run `src/06_make-graphs_PPP.Rmd` to create all PPP figures
-7. Run `Rscript src/07_rank_tables_PPP.R` to create the PPP rank tables in `Results/Table`
+7. Run `Rscript src/07_rank_tables_PPP.R` to create the PPP rank table CSV in `Results/Plots` and the table figure in `Results/Plots/Figs`
 
 ---
 

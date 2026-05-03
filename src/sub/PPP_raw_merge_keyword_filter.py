@@ -18,8 +18,8 @@ def _find_project_root(start: Path) -> Path:
 def main(project_root: Path) -> None:
     project_root = Path(project_root).resolve()
     raw_data_path = project_root / "Data" / "raw" / "PPP"
-    intermediate_data_path = project_root / "Data" / "intermediate"
-    intermediate_data_path.mkdir(parents=True, exist_ok=True)
+    cleaned_data_path = project_root / "Data"
+    cleaned_data_path.mkdir(parents=True, exist_ok=True)
 
     if not raw_data_path.is_dir():
         raise FileNotFoundError(f"Missing raw PPP input directory: {raw_data_path}")
@@ -629,19 +629,16 @@ def main(project_root: Path) -> None:
             print(f"  {state:<10} {count:>10,} ({count/len(ppp_deduped)*100:>5.1f}%)")
 
     # ── Save results ──
-    output_person = os.path.join(intermediate_data_path, "PPP_person_names_filtered.csv")
-    output_business = os.path.join(intermediate_data_path, "PPP_business_names_filtered.csv")
+    output_person = os.path.join(cleaned_data_path, "PPP_person_names_filtered.csv")
 
     ppp_deduped.to_csv(output_person, index=False)
-    ppp_business_names.to_csv(output_business, index=False)
 
     print(f"\n{'=' * 60}")
     print("FILES SAVED")
     print("=" * 60)
     print(f"  Person names:   {output_person}")
     print(f"    Records: {len(ppp_deduped):,}")
-    print(f"  Business names: {output_business}")
-    print(f"    Records: {len(ppp_business_names):,}")
+    print("  Business names: not saved; only used for keyword-filter diagnostics")
     print(f"\n{'=' * 60}")
     print("DONE!")
     print("=" * 60)

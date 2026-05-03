@@ -312,9 +312,8 @@ display_result_df <- result_df %>%
 
 # --- Step 8a: Export as CSV ---------------------------------------------------
 
-table_dir <- file.path(base_dir, "Results", "Table")
-dir.create(table_dir, recursive = TRUE, showWarnings = FALSE)
-out_csv <- file.path(table_dir, "07_rank_table_PPP.csv")
+dir.create(plots_dir, recursive = TRUE, showWarnings = FALSE)
+out_csv <- file.path(plots_dir, "07_rank_table_PPP.csv")
 write_csv(display_result_df, out_csv)
 cat("CSV saved to:", out_csv, "\n")
 

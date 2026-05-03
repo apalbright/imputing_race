@@ -23,15 +23,13 @@ def _find_project_root(start: Path) -> Path:
 
 def main(project_root: Path) -> None:
     project_root = Path(project_root).resolve()
-    intermediate_data_path = project_root / "Data" / "intermediate"
     cleaned_data_path = project_root / "Data"
-    intermediate_data_path.mkdir(parents=True, exist_ok=True)
     cleaned_data_path.mkdir(parents=True, exist_ok=True)
 
     print(f"Project root: {project_root}")
 
-    # Load person names produced by PPP_keyword_filter.ipynb
-    input_file = os.path.join(intermediate_data_path, "PPP_person_names_filtered.csv")
+    # Load person names produced by the raw merge / keyword filter step.
+    input_file = os.path.join(cleaned_data_path, "PPP_person_names_filtered.csv")
     ppp = pd.read_csv(input_file, low_memory=False)
     print(f"Loaded {len(ppp):,} rows from {input_file}")
     print(f"Columns: {list(ppp.columns)}")
@@ -51,7 +49,7 @@ def main(project_root: Path) -> None:
     print("=" * 60)
     print(f"Total names imported: {len(ppp):,}")
     print(f"  Source: PPP_person_names_filtered.csv")
-    print(f"  (produced by PPP_keyword_filter.ipynb)")
+    print(f"  (produced by PPP_raw_merge_keyword_filter.py)")
     print(f"\nUnique BorrowerNames:  {ppp['BorrowerName'].nunique():,}")
     print(f"Missing BorrowerName:  {ppp['BorrowerName'].isna().sum():,}")
     print(f"Duplicate loan rows:   {ppp.duplicated(subset='LoanNumber').sum():,}")

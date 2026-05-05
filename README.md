@@ -72,11 +72,6 @@ Code was run with the following software and package versions:
 - Python version 3.7.7 environment for PPP ZRP
     -    zrp
 
-### Generated files
-
-- Stata creates `.log` files automatically when scripts are run in batch mode, for example with `stata-mp -b do ...`. These logs are not required for replication and can be deleted after the run.
-- Python `__pycache__/` folders and `.pyc` files are runtime caches and are not required.
-
 ### Runtime
 
 - run for `00_clean_raw_PPP.py`: several min
@@ -87,3 +82,8 @@ Code was run with the following software and package versions:
 - run for `05_merge_all_methods_PPP.do`: 1-2 min
 - run for `06_make-graphs_PPP.Rmd`: 1-2 min
 - run for `07_rank_tables_PPP.R`: short
+
+### Note on generated files
+
+- Stata creates `.log` files automatically when scripts are run in batch mode, for example with `stata-mp -b do ...`. These logs are not required for replication and can be deleted after the run.
+- Python `__pycache__/` folders and `.pyc` files are runtime caches and are not required.

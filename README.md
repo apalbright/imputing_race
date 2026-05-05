@@ -1,6 +1,8 @@
-# Replication Package for "Imputing Race" - PPP
+# Replication Package for "Imputing Race"
 
-This repository contains replication materials for the PPP extension of "Imputing Race" by [Alex Albright](https://www.albrightalex.com/) and [Juliana Gamboa-Arbelaez](https://sites.google.com/view/juliana-gamboa-arbelaez/home)
+This repository contains replication materials for the paper "Imputing Race" 
+- Paper authors: [Alex Albright](https://www.albrightalex.com/) and [Juliana Gamboa-Arbelaez](https://sites.google.com/view/juliana-gamboa-arbelaez/home)
+- Paper date: May 2026
 
 ---
 

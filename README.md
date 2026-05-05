@@ -83,7 +83,7 @@ Code was run with the following software and package versions:
 - run for `01_clean_prep_PPP.do`: a few min
 - run for `02_predict_PPP.Rmd`: several min
 - run for `src/sub/PPP_ZRP_predict.py`: used A100 GPU in Google colab, 1.5 hours
-- run for `04_NamePrism_predict_PPP.py`: about 0.9 second per name, 70 hours in totle
+- run for `04_NamePrism_predict_PPP.py`: about 0.9 second per name, 70 hours in total
 - run for `05_merge_all_methods_PPP.do`: 1-2 min
 - run for `06_make-graphs_PPP.Rmd`: 1-2 min
 - run for `07_rank_tables_PPP.R`: short

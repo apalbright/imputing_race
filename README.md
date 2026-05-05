@@ -10,10 +10,9 @@ This repository contains replication materials for the paper "Imputing Race"
 ### Raw Data
 
 1. **PPP data**
-   - Data source: US Small Business Administration (SBA) - FOIA release (last updated Oct 21, 2024)
-   - Link: https://data.sba.gov/dataset/ppp-foia
-   - Data exceeds github repo limits, therefore replicators must download raw data directly from SBA and place in `Data/raw/`
-   - In case of SBA link breakage, we back up raw files for posterity on OSF -- [see link here](https://osf.io/bq7n8)
+   - Data source: [US Small Business Administration (SBA) - FOIA release (last updated: 10/21/24)](https://data.sba.gov/dataset/ppp-foia)
+   - Raw data exceeds GitHub's file size limits, so it must be downloaded directly from SBA and placed in `Data/raw/`
+   - Raw files are also backed up [on OSF](https://osf.io/bq7n8) in case the SBA link breaks or data is removed
 
 2. **ZIP code-level race composition data**
    - The PPP ZIP benchmark requires `nhgis0002_ds267_20235_zcta.csv` in `Data/`.

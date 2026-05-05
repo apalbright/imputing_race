@@ -9,16 +9,16 @@ This repository contains replication materials for the paper "Imputing Race"
 
 ### Raw Data
 
-1. **PPP data**
+1. PPP data
    - Data source: [US Small Business Administration (SBA) - FOIA release (last updated: 10/21/24)](https://data.sba.gov/dataset/ppp-foia)
    - Raw data exceeds GitHub's file size limits, so it must be downloaded directly from SBA and placed in `Data/raw/`
       - *Raw files are also backed up [on OSF](https://osf.io/bq7n8) in case the SBA link breaks or data is removed*
 
-2. **ZIP code-level race composition data**
+2. ZIP code-level race composition data
    - The PPP ZIP benchmark requires `nhgis0002_ds267_20235_zcta.csv` in `Data/`.
      This NHGIS extract is not included in GitHub; users must download the matching NHGIS ZCTA extract and save/rename it to `Data/nhgis0002_ds267_20235_zcta.csv` before running the ZIP benchmark.
 
-3. **ZIP-to-tract crosswalk**
+3. ZIP-to-tract crosswalk
    - The PPP BIFSG workflow uses `ZIP_TRACT_122025.xlsx` or `ZIP_TRACT_122025_bestres.dta` in `Data/`.
 
 All other files in `Data/` are cleaned and processed datasets.

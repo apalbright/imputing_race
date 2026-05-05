@@ -27,20 +27,20 @@ All other files in `Data/` are cleaned and processed datasets.
 
 ### Instructions to replicate everything
 
-0. Run `src/00_clean_raw_PPP.py` *(Python)* to merge raw PPP files, filter person names, parse borrower names, and generate cleaned data: `Data/PPP_person_names_filtered.csv` and `Data/PPP_person_names_final.csv`
+0. Run `src/00_clean_raw_PPP.py` *(Python)* to merge raw PPP files, filter person names, parse borrower names, and generate cleaned data
 1. Run `src/01_clean_prep_PPP.do` *(Stata)* to set paths, clean the parsed PPP borrower file, and set up data for all imputation methods
 2. Run `src/02_predict_PPP.Rmd` *(R)* to run all imputation methods that use R *(surname, BISG, BIFSG, BIRDiE)*
-3. To generate ZRP results,
+3. To generate *ZRP* results,
    - upload the full replication package into google drive under Colab notebooks files
    - run `src/03_ZRP_PPP.ipynb` *(Python notebook)*
    - it writes `Data/PPP_results_interim_ZRP.csv`, save it locally to `Data` and leave the Colab environment
-4. To generate NamePrism results,
+4. To generate *NamePrism* results,
    - request an API key for running NamePrism [here](https://www.name-prism.com/api)
    - add the API key to `src/sub/PPP_NamePrism_predict.py`
    - run `python src/04_NamePrism_predict_PPP.py` *(Python)*
-5. Run `src/05_merge_all_methods_PPP.do` *(Stata)* to merge all imputation method results and yield PPP evaluation files in `Results/Plots`
-6. Run `src/06_make-graphs_PPP.Rmd` *(R)* to create all PPP figures
-7. Run `src/07_rank_tables_PPP.R` *(R)* to create the PPP rank table CSV in `Results/Plots` and the table figure in `Results/Plots/Figs`
+5. Run `src/05_merge_all_methods_PPP.do` *(Stata)* to merge all imputation method results
+6. Run `src/06_make-graphs_PPP.Rmd` *(R)* to create all PPP figures (pngs)
+7. Run `src/07_rank_tables_PPP.R` *(R)* to create the PPP rank table (csv)
 
 ---
 

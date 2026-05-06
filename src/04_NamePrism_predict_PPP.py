@@ -13,8 +13,8 @@ import sys
 # Set base directory (assumes you run from project root)
 base_dir = os.getcwd()
 
-# Define global paths
-dta   = os.path.join(base_dir, "Data")
+# Define project paths
+data  = os.path.join(base_dir, "Data")
 ans   = os.path.join(base_dir, "Results")
 codes = os.path.join(base_dir, "src")
 

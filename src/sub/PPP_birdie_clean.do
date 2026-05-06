@@ -14,7 +14,7 @@ Notes:
 */
 
 * Upload data
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 rename last_name lastname
 rename first_name firstname
@@ -37,4 +37,4 @@ keep zipcode surname fintech_reg
 
 compress 
 
-save "${dta}/PPP_birdie_interim.dta", replace
+save "${method_inputs}/PPP_birdie_interim.dta", replace

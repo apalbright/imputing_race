@@ -13,14 +13,14 @@ Notes:
 
 * Upload data
 
-import delimited "${dta}/PPP_NamePrism.csv", varnames(1) clear
+import delimited "${method_inputs}/PPP_NamePrism.csv", varnames(1) clear
 gen N=_n
 replace N=N-1
 keep N fullname
 tempfile t1
 save `t1'
 
-import delimited "${dta}/PPP_NamePrism_res.csv", clear
+import delimited "${predictions}/PPP_NamePrism_res.csv", clear
 rename a N
 
 merge 1:1 N using `t1', nogen
@@ -70,13 +70,13 @@ keep fullname predicted
 compress
 
 
-save "${dta}/PPP_Nameprism_Python.dta", replace
+save "${predictions}/PPP_Nameprism_Python.dta", replace
 
 
 *********************************************************************************
 ** Now match the outcomes from Python code to the above data and verify that how correct the predictions are
 ********************
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 replace first_name=strupper(first_name)
@@ -90,7 +90,7 @@ replace name=stritrim(name)
 rename name fullname
 
 
-merge m:m fullname using "${dta}/PPP_Nameprism_Python.dta"
+merge m:m fullname using "${predictions}/PPP_Nameprism_Python.dta"
 keep if _m==3
  drop _m
 
@@ -174,7 +174,7 @@ count_Asian_white count_Asian_asian	count_Asian_black	count_Asian_hispanic	count
 count_Black_white count_Black_asian	count_Black_black	count_Black_hispanic	count_Black_other	///
 count_Hispanic_white count_Hispanic_asian	count_Hispanic_black	count_Hispanic_hispanic	count_Hispanic_other	///
 count_Other_white count_Other_asian	count_Other_black	count_Other_hispanic	///
-count_Other_other black	white asian hispanic fintech_white fintech_black fintech_asian fintech_hispanic{
+count_Other_other black	white asian hispanic fintech_white fintech_black fintech_asian fintech_hispanic {
 
 
 	rename `var' Nprism_`var'

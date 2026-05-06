@@ -5,7 +5,6 @@
 # =============================================================================
 
 library(tidyverse)
-library(gt)
 
 # --- Configuration -----------------------------------------------------------
 
@@ -163,58 +162,6 @@ rank_gap_table <- function(methods, gaps_df, real_gaps_df) {
   ranked_df
 }
 
-build_gt_table <- function(df, methods, title, subtitle, footnote) {
-  tbl <- df %>%
-    group_by(group) %>%
-    gt(rowname_col = "Metric") %>%
-    tab_header(
-      title = md(title),
-      subtitle = subtitle
-    ) %>%
-    tab_footnote(md(footnote)) %>%
-    tab_options(
-      table.font.names = c("Palatino", "serif"),
-      table.font.size = px(14),
-      heading.title.font.size = px(20),
-      heading.subtitle.font.size = px(14),
-      row_group.font.weight = "bold",
-      column_labels.font.weight = "bold",
-      table.width = pct(100)
-    ) %>%
-    cols_align(align = "center", columns = all_of(methods))
-
-  for (col_name in methods) {
-    for (row_idx in seq_len(nrow(df))) {
-      cell_val <- df[[col_name]][row_idx]
-      if (!is.na(cell_val) && grepl("^1($| )", cell_val)) {
-        tbl <- tbl %>%
-          tab_style(
-            style = list(
-              cell_fill(color = "#B2DFDB"),
-              cell_text(weight = "bold")
-            ),
-            locations = cells_body(
-              columns = !!sym(col_name), rows = row_idx
-            )
-          )
-      }
-    }
-  }
-
-  tbl
-}
-
-save_gt_png <- function(tbl, path) {
-  if (!requireNamespace("webshot2", quietly = TRUE)) {
-    warning("Skipping PNG export because the webshot2 package is not installed.")
-    return(invisible(FALSE))
-  }
-
-  gtsave(tbl, path, expand = 10)
-  cat("PNG saved to:", path, "\n")
-  invisible(TRUE)
-}
-
 # --- Step 3: Rank F1 by race -------------------------------------------------
 
 table_methods <- unique(c(METHODS, intersect(BIRDIE_METHODS, unique(gaps_raw$Method))))
@@ -306,36 +253,12 @@ for (k in seq_along(table_methods)) {
 result_df <- bind_rows(f1_race_ranked, f1_agg_ranked, gap_ranked, pop_ranked) %>%
   select(group, Metric, all_of(table_methods))
 
-display_table_methods <- display_method_names(table_methods)
 display_result_df <- result_df %>%
   rename_with(display_method_names, all_of(table_methods))
 
-# --- Step 8a: Export as CSV ---------------------------------------------------
+# --- Step 8: Export as CSV ----------------------------------------------------
 
 dir.create(plots_dir, recursive = TRUE, showWarnings = FALSE)
 out_csv <- file.path(plots_dir, "07_rank_table_PPP.csv")
 write_csv(display_result_df, out_csv)
 cat("CSV saved to:", out_csv, "\n")
-
-# --- Step 8b: Export as PNG via gt --------------------------------------------
-
-figs_dir <- file.path(plots_dir, "Figs")
-dir.create(figs_dir, recursive = TRUE, showWarnings = FALSE)
-
-tbl <- build_gt_table(
-  display_result_df,
-  display_table_methods,
-  "**Rank-Order of Approaches**",
-  "PPP Sample",
-  paste0(
-    "Rank 1 = best. **F1**: highest value. ",
-    "**Gaps**: closest to ground truth. ",
-    "**Population**: closest to observed. ",
-    "**Distance**: lowest. ",
-    "Missing inputs are ranked last. ",
-    "`--` = not ranked outside the racial gaps panel."
-  )
-)
-
-out_png <- file.path(figs_dir, "07_rank_table_PPP.png")
-save_gt_png(tbl, out_png)

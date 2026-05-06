@@ -14,8 +14,8 @@ Notes:
 - Preserves PPP row count and assigns a stable bifsg_id for 1:1 merge-back
 */
 
-local crosswalk_dta "${dta}/ZIP_TRACT_122025_bestres.dta"
-local crosswalk_xlsx "${dta}/ZIP_TRACT_122025.xlsx"
+local crosswalk_dta "${support}/ZIP_TRACT_122025_bestres.dta"
+local crosswalk_xlsx "${support}/ZIP_TRACT_122025.xlsx"
 
 
 capture confirm file "`crosswalk_dta'"
@@ -56,7 +56,7 @@ if _rc!=0 {
 }
 
 
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 gen long bifsg_id = _n
 
@@ -88,4 +88,4 @@ replace borrower_state = upper(trim(borrower_state))
 	keep bifsg_id firstname surname state county tract zip_code borrower_state preferred_state state_mismatch fintech race_code ethnic_code
 
 	compress
-	save "${dta}/PPP_BIFSG_interim.dta", replace
+	save "${method_inputs}/PPP_BIFSG_interim.dta", replace

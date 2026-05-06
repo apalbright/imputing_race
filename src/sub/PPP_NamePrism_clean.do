@@ -16,7 +16,7 @@ Notes:
 
 * Upload data
 
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 replace first_name=strupper(first_name)
@@ -34,4 +34,4 @@ keep fullname
 *** Single batch export for NamePrism API
 
 compress
-export delimited using "${dta}/PPP_NamePrism.csv", replace
+export delimited using "${method_inputs}/PPP_NamePrism.csv", replace

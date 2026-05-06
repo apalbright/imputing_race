@@ -56,9 +56,9 @@ if _rc!=0 {
 	exit 601
 }
 
-capture confirm file "${dta}/PPP_birdie_prediction.dta"
+capture confirm file "${predictions}/PPP_birdie_prediction.dta"
 if _rc!=0 {
-	di as error "Missing PPP BIRDiE prediction file: ${dta}/PPP_birdie_prediction.dta"
+	di as error "Missing PPP BIRDiE prediction file: ${predictions}/PPP_birdie_prediction.dta"
 	exit 601
 }
 
@@ -339,7 +339,7 @@ gen other_pop_real= (total_other/total_observations_max)*100
 
 
 preserve
-use "${dta}/PPP_birdie_prediction.dta", clear
+use "${predictions}/PPP_birdie_prediction.dta", clear
 foreach gap in black_white black_hispanic black_asian hispanic_white hispanic_asian asian_white {
 	quietly summarize estimate if gap_name=="`gap'", meanonly
 	scalar gap_`gap'_birdie = r(mean)*100

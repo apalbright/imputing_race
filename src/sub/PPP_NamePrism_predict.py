@@ -19,8 +19,10 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 # Go up two levels: from sub -> src -> main
 project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
 
-# Data folder lives at main/Data
-data_dir = os.path.join(project_root, "Data")
+# Data folders live under main/Data
+method_inputs_dir = os.path.join(project_root, "Data", "interim", "method_inputs")
+predictions_dir = os.path.join(project_root, "Data", "interim", "predictions")
+os.makedirs(predictions_dir, exist_ok=True)
 
 
 # Prepare
@@ -30,14 +32,14 @@ dataname = "PPP_NamePrism.csv"
 colname = "fullname"
 
 def load_data():
-    data_test = pd.read_csv(os.path.join(data_dir, dataname))
+    data_test = pd.read_csv(os.path.join(method_inputs_dir, dataname))
     return data_test[colname]
 
 x_test = load_data()
 
 print(f"Loaded {len(x_test)} names")
 
-output_file = os.path.join(data_dir, "PPP_NamePrism_res.csv")
+output_file = os.path.join(predictions_dir, "PPP_NamePrism_res.csv")
 delay = 0.5         # Delay in seconds between API requests
 max_retries = 3
 flush_every = 500   # Flush partial results to disk every N successful records

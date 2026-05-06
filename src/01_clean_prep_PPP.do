@@ -30,9 +30,19 @@ if _rc!=0 {
 }
 
 
-global dta "./Data"
+global data "./Data"
+global raw_ppp "./Data/raw/PPP"
+global support "./Data/raw/geo"
+global processed "./Data/interim/processed_PPP"
+global method_inputs "./Data/interim/method_inputs"
+global predictions "./Data/interim/predictions"
 global ans "./Results"
 global codes "./src"
+
+capture mkdir "${processed}"
+capture mkdir "./Data/interim"
+capture mkdir "${method_inputs}"
+capture mkdir "${predictions}"
 
 
 ********************************************************************************
@@ -40,7 +50,7 @@ global codes "./src"
 ********************************************************************************
 
 
-local inputfile "${dta}/PPP_person_names_final.csv"
+local inputfile "${processed}/PPP_person_names_final.csv"
 capture confirm file "`inputfile'"
 if _rc!=0 {
 	di as error "Missing final PPP person-name input: `inputfile'"
@@ -157,7 +167,7 @@ keep `keepvars'
 
 compress
 
-save "${dta}/PPP_clean.dta", replace
+save "${processed}/PPP_clean.dta", replace
 
 
 ///////////////////////////////////////////

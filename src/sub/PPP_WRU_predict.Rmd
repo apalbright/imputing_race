@@ -42,6 +42,11 @@ while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
   .dir <- dirname(.dir)
 }
 parent_dir <- .dir
+method_inputs_dir <- file.path(parent_dir, "Data", "interim", "method_inputs")
+predictions_dir <- file.path(parent_dir, "Data", "interim", "predictions")
+processed_dir <- file.path(parent_dir, "Data", "interim", "processed_PPP")
+dir.create(method_inputs_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(predictions_dir, recursive = TRUE, showWarnings = FALSE)
 
 # PPP step-style dataset names
 input_file <- "PPP_wru_interim.dta"
@@ -56,14 +61,14 @@ race_col_override <- NULL
 
 ```{r load_data, message=FALSE, warning=FALSE}
 # Read WRU interim file from clean step
-in_path <- file.path(parent_dir, "Data", input_file)
+in_path <- file.path(method_inputs_dir, input_file)
 raw_df <- NULL
 
 if (file.exists(in_path)) {
   raw_df <- haven::read_dta(in_path)
 } else {
-  csv_fallback <- file.path(parent_dir, "Data", "PPP_clean.csv")
-  dta_fallback <- file.path(parent_dir, "Data", "PPP_clean.dta")
+  csv_fallback <- file.path(processed_dir, "PPP_clean.csv")
+  dta_fallback <- file.path(processed_dir, "PPP_clean.dta")
 
   if (file.exists(csv_fallback)) {
     message("PPP_wru_interim.dta not found; using fallback PPP_clean.csv and creating interim id.")
@@ -353,7 +358,7 @@ if (nrow(prediction_step) > 0) {
 }
 
 # Save step-style WRU predictions
-out_step_path <- file.path(parent_dir, "Data", output_file)
+out_step_path <- file.path(predictions_dir, output_file)
 zipcode_export <- prediction_step %>%
   dplyr::select(zcta5, surname, dplyr::all_of(pred_cols))
 haven::write_dta(zipcode_export, out_step_path)

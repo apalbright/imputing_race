@@ -15,7 +15,7 @@ Notes:
 
 
 clear
-import delimited "${dta}/PPP_results_interim_ZRP.csv"
+import delimited "${predictions}/PPP_results_interim_ZRP.csv"
 
 capture confirm numeric variable zip_code
 if _rc == 0 {
@@ -31,13 +31,13 @@ keep first_name middle_name last_name zip_code race_proxy
 compress
 
 
-save "${dta}/PPP_results_interim_ZRP.dta", replace
+save "${predictions}/PPP_results_interim_ZRP.dta", replace
 
 
 *********************************************************************************
 ** Now match the outcomes from Python code to the above data and verify that how correct the predictions are
 ********************
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 recast  str146 last_name, force
@@ -45,7 +45,7 @@ recast  str143 first_name, force
 recast  str165 middle_name, force
 
 
-merge m:m first_name middle_name last_name zip_code using "${dta}/PPP_results_interim_ZRP.dta"
+merge m:m first_name middle_name last_name zip_code using "${predictions}/PPP_results_interim_ZRP.dta"
 
 
  ** replace race for hispanic
@@ -128,7 +128,7 @@ count_Asian_white count_Asian_asian	count_Asian_black	count_Asian_hispanic	count
 count_Black_white count_Black_asian	count_Black_black	count_Black_hispanic	count_Black_other	///
 count_Hispanic_white count_Hispanic_asian	count_Hispanic_black	count_Hispanic_hispanic	count_Hispanic_other	///
 count_Other_white count_Other_asian	count_Other_black	count_Other_hispanic	///
-count_Other_other black	white asian hispanic fintech_white fintech_black fintech_asian fintech_hispanic{
+count_Other_other black	white asian hispanic fintech_white fintech_black fintech_asian fintech_hispanic {
 
 	rename `var' ZRP_`var'
 

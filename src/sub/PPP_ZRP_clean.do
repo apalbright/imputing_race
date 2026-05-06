@@ -15,7 +15,7 @@ Notes:
 
 
 * Upload data
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 keep last_name first_name middle_name zip_code state street_address house_number city
@@ -26,4 +26,4 @@ tostring zip_code, replace
 replace zip_code="" if zip_code=="."
 
 
-export delimited using "${dta}/PPP_ZRP_interim.csv", replace
+export delimited using "${method_inputs}/PPP_ZRP_interim.csv", replace

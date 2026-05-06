@@ -31,9 +31,12 @@ while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
   .dir <- dirname(.dir)
 }
 parent_dir <- .dir
+method_inputs_dir <- file.path(parent_dir, "Data", "interim", "method_inputs")
+predictions_dir <- file.path(parent_dir, "Data", "interim", "predictions")
+dir.create(predictions_dir, recursive = TRUE, showWarnings = FALSE)
 
-input_file <- file.path(parent_dir, "Data", "PPP_BIFSG_interim.dta")
-output_file <- file.path(parent_dir, "Data", "PPP_BIFSG_prediction.dta")
+input_file <- file.path(method_inputs_dir, "PPP_BIFSG_interim.dta")
+output_file <- file.path(predictions_dir, "PPP_BIFSG_prediction.dta")
 pred_cols <- c("pred_whi", "pred_bla", "pred_his", "pred_asi", "pred_oth")
 ```
 

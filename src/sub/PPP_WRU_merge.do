@@ -14,7 +14,7 @@ Notes:
 */
 
 
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 rename last_name lastname
@@ -31,7 +31,7 @@ replace surname=upper(surname)
 rename zipcode zcta5
 
 
-merge m:m surname zcta5 using "${dta}/PPP_wru_interim_prediction.dta", nogen
+merge m:m surname zcta5 using "${predictions}/PPP_wru_interim_prediction.dta", nogen
 
 
 
@@ -132,7 +132,7 @@ count_Asian_white count_Asian_asian count_Asian_black count_Asian_hispanic count
 count_Black_white count_Black_asian count_Black_black count_Black_hispanic count_Black_other ///
 count_Hispanic_white count_Hispanic_asian count_Hispanic_black count_Hispanic_hispanic count_Hispanic_other ///
 count_Other_white count_Other_asian count_Other_black count_Other_hispanic ///
-count_Other_other black white asian hispanic fintech_white fintech_black fintech_asian fintech_hispanic{
+count_Other_other black white asian hispanic fintech_white fintech_black fintech_asian fintech_hispanic {
 
 	rename `var' wru_`var'
 

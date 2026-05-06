@@ -14,19 +14,19 @@ Notes:
 - Uses fintech (fintech==1) instead of party DEM coding
 */
 
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 rename last_name lastname
 rename first_name firstname
 rename race_code race
-capture confirm file "${dta}/results_interim_lastname_PPP.dta"
+capture confirm file "${predictions}/results_interim_lastname_PPP.dta"
 if _rc!=0 {
-	di as error "Missing PPP surname prediction lookup: ${dta}/results_interim_lastname_PPP.dta"
+	di as error "Missing PPP surname prediction lookup: ${predictions}/results_interim_lastname_PPP.dta"
 	exit 601
 }
 
-merge m:m lastname using "${dta}/results_interim_lastname_PPP.dta"
+merge m:m lastname using "${predictions}/results_interim_lastname_PPP.dta"
 keep if _m==3
 drop _m
 

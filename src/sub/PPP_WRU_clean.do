@@ -14,12 +14,12 @@ Notes:
 */
 
 * Upload data
-capture confirm file "${dta}/PPP_clean.csv"
+capture confirm file "${processed}/PPP_clean.csv"
 if _rc==0 {
-	import delimited "${dta}/PPP_clean.csv", clear varnames(1)
+	import delimited "${processed}/PPP_clean.csv", clear varnames(1)
 }
 else {
-	use "${dta}/PPP_clean.dta", clear
+	use "${processed}/PPP_clean.dta", clear
 }
 
 
@@ -42,4 +42,4 @@ keep zipcode surname firstname state
 compress
 
 
-save "${dta}/PPP_wru_interim.dta", replace
+save "${method_inputs}/PPP_wru_interim.dta", replace

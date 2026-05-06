@@ -18,6 +18,9 @@ while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
   .dir <- dirname(.dir)
 }
 parent_dir <- .dir
+method_inputs_dir <- file.path(parent_dir, "Data", "interim", "method_inputs")
+predictions_dir <- file.path(parent_dir, "Data", "interim", "predictions")
+dir.create(predictions_dir, recursive = TRUE, showWarnings = FALSE)
 install.packages("remotes", repos = repos)
 remotes::install_version("haven", version = "2.5.4", repos = repos, type = "source", upgrade = "never")
 if (!requireNamespace("foreign", quietly = TRUE)) install.packages("foreign", repos = repos)
@@ -31,7 +34,7 @@ library(birdie)
 
 ```{r birdie_predict, message=FALSE, warning=FALSE}
 # Load voter data using relative path (recommended)
-datazip <- haven::read_dta(file.path(parent_dir, "Data", "PPP_birdie_interim.dta"))
+datazip <- haven::read_dta(file.path(method_inputs_dir, "PPP_birdie_interim.dta"))
 
 datazip$surnameUPPER <- toupper(datazip$surname)
 datazip$zipcode_fct <- as.factor(datazip$zipcode)
@@ -85,9 +88,8 @@ gap_df <- data.frame(
                asian_white)
 )
 
-haven::write_dta(gap_df, file.path(parent_dir, "Data", "PPP_birdie_prediction.dta"))
+haven::write_dta(gap_df, file.path(predictions_dir, "PPP_birdie_prediction.dta"))
 
 
 
 ```
-

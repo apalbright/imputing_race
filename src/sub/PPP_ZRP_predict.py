@@ -6,7 +6,7 @@
 #pipwin list
 #pipwin install gdal
 #pipwin install fiona
-#pip install zrp
+#pip install zrp==0.4.1
 #python -m zrp download
 
 
@@ -37,7 +37,11 @@ from zrp.prepare.utils import load_file, load_json
 
 
 ## PPP
-ppp_data = load_file(src_path + "/Data/PPP_ZRP_interim.csv")
+method_inputs_dir = os.path.join(src_path, "Data", "interim", "method_inputs")
+predictions_dir = os.path.join(src_path, "Data", "interim", "predictions")
+os.makedirs(predictions_dir, exist_ok=True)
+
+ppp_data = load_file(os.path.join(method_inputs_dir, "PPP_ZRP_interim.csv"))
 
 zrp_sample = pd.DataFrame(columns=['first_name', 'middle_name', 'last_name', 'state', 'zip_code', 'street_address', 'house_number', 'city'])
 
@@ -87,4 +91,4 @@ zrp_output = zest_race_predictor.transform(zrp_sample)
 
 
 
-zrp_output.to_csv(src_path + "/Data/PPP_results_interim_ZRP.csv")
+zrp_output.to_csv(os.path.join(predictions_dir, "PPP_results_interim_ZRP.csv"))

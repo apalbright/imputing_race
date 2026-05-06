@@ -14,7 +14,7 @@ Notes:
 */
 
 
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 
 rename race_code race

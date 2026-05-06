@@ -14,20 +14,20 @@ Notes:
 - Uses fintech (fintech==1) instead of party DEM coding
 */
 
-capture confirm file "${dta}/PPP_BIFSG_interim.dta"
+capture confirm file "${method_inputs}/PPP_BIFSG_interim.dta"
 if _rc!=0 {
-	di as error "Missing PPP BIFSG interim file: ${dta}/PPP_BIFSG_interim.dta"
+	di as error "Missing PPP BIFSG interim file: ${method_inputs}/PPP_BIFSG_interim.dta"
 	exit 601
 }
 
-capture confirm file "${dta}/PPP_BIFSG_prediction.dta"
+capture confirm file "${predictions}/PPP_BIFSG_prediction.dta"
 if _rc!=0 {
-	di as error "Missing PPP BIFSG prediction file: ${dta}/PPP_BIFSG_prediction.dta"
+	di as error "Missing PPP BIFSG prediction file: ${predictions}/PPP_BIFSG_prediction.dta"
 	exit 601
 }
 
-use "${dta}/PPP_BIFSG_interim.dta", clear
-merge 1:1 bifsg_id using "${dta}/PPP_BIFSG_prediction.dta", nogen keep(master match)
+use "${method_inputs}/PPP_BIFSG_interim.dta", clear
+merge 1:1 bifsg_id using "${predictions}/PPP_BIFSG_prediction.dta", nogen keep(master match)
 
 gen race = race_code
 replace race = "Unknown/Unreported" if race==""

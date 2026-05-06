@@ -19,10 +19,10 @@ tempfile zcta_lookup
 
 
 ******************** ZIPCODE LOOKUP
-* Required NHGIS input is not tracked in GitHub.
-* Download the matching ZCTA extract and save/rename it as:
-* Data/nhgis0002_ds267_20235_zcta.csv
-import delimited "${dta}/nhgis0002_ds267_20235_zcta.csv", clear
+* Required NHGIS input is tracked in GitHub under Data/raw/geo/.
+* Tracked support input:
+* Data/raw/geo/nhgis0002_ds267_20235_zcta.csv
+import delimited "${support}/nhgis0002_ds267_20235_zcta.csv", clear
 
 compress
 
@@ -62,7 +62,7 @@ save `zcta_lookup'
 
 
 ******************** PPP DATA
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 rename race_code race
 rename zip_code zipcode

@@ -19,6 +19,9 @@ while (!dir.exists(file.path(.dir, "Data")) && .dir != dirname(.dir)) {
   .dir <- dirname(.dir)
 }
 parent_dir <- .dir
+method_inputs_dir <- file.path(parent_dir, "Data", "interim", "method_inputs")
+predictions_dir <- file.path(parent_dir, "Data", "interim", "predictions")
+dir.create(predictions_dir, recursive = TRUE, showWarnings = FALSE)
 
 install.packages("remotes", repos = repos)
 remotes::install_version("haven", version = "2.5.4", repos = repos, type = "source", upgrade = "never")
@@ -27,11 +30,11 @@ remotes::install_version("predictrace", version = "2.0.1", repos = repos, type =
 ```
 
 ```{r lastname_predict_ppp, message=FALSE, warning=FALSE}
-data <- haven::read_dta(file.path(parent_dir, "Data", "lastname_interim_PPP.dta"))
+data <- haven::read_dta(file.path(method_inputs_dir, "lastname_interim_PPP.dta"))
 
 results <- predictrace::predict_race(data$lastname, probability = FALSE, surname = TRUE)
 names(results)[names(results) == "name"] <- "lastname"
 
 results[results == ""] <- NA
-haven::write_dta(results, file.path(parent_dir, "Data", "results_interim_lastname_PPP.dta"))
+haven::write_dta(results, file.path(predictions_dir, "results_interim_lastname_PPP.dta"))
 ```

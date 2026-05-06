@@ -15,11 +15,9 @@ def _find_project_root(start: Path) -> Path:
     raise FileNotFoundError("Could not find project root containing Data/ and src/.")
 
 
-def main(project_root: Path) -> None:
+def main(project_root: Path) -> pd.DataFrame:
     project_root = Path(project_root).resolve()
     raw_data_path = project_root / "Data" / "raw" / "PPP"
-    cleaned_data_path = project_root / "Data"
-    cleaned_data_path.mkdir(parents=True, exist_ok=True)
 
     if not raw_data_path.is_dir():
         raise FileNotFoundError(f"Missing raw PPP input directory: {raw_data_path}")
@@ -628,20 +626,16 @@ def main(project_root: Path) -> None:
         for state, count in state_dist.items():
             print(f"  {state:<10} {count:>10,} ({count/len(ppp_deduped)*100:>5.1f}%)")
 
-    # ── Save results ──
-    output_person = os.path.join(cleaned_data_path, "PPP_person_names_filtered.csv")
-
-    ppp_deduped.to_csv(output_person, index=False)
-
     print(f"\n{'=' * 60}")
-    print("FILES SAVED")
+    print("OUTPUT")
     print("=" * 60)
-    print(f"  Person names:   {output_person}")
+    print("  Person names: kept in memory for name parsing; no intermediate CSV saved")
     print(f"    Records: {len(ppp_deduped):,}")
     print("  Business names: not saved; only used for keyword-filter diagnostics")
     print(f"\n{'=' * 60}")
     print("DONE!")
     print("=" * 60)
+    return ppp_deduped
 
 
 

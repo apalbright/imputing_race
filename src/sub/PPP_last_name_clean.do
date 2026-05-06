@@ -16,7 +16,7 @@ Notes:
 
 * Upload data
 
-use "${dta}/PPP_clean.dta", clear
+use "${processed}/PPP_clean.dta", clear
 
 ***With underlying BISG probabilities Zipcode
 rename last_name lastname
@@ -30,4 +30,4 @@ order lastname firstname
 compress
 
 
-save "${dta}/lastname_interim_PPP.dta", replace
+save "${method_inputs}/lastname_interim_PPP.dta", replace

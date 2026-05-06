@@ -7,6 +7,10 @@ __pycache__/
 .Rhistory
 .RData
 
-/Data/*
-!/Data/ZIP_TRACT_122025.xlsx
-!/Data/nhgis0002_ds267_20235_zcta.csv
+# Keep most Data contents out of Git, but track folder placeholders and support files.
+Data/**
+!Data/
+!Data/**/
+!Data/**/.gitkeep
+!Data/raw/geo/ZIP_TRACT_122025.xlsx
+!Data/raw/geo/nhgis0002_ds267_20235_zcta.csv

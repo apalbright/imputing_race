@@ -27,7 +27,7 @@ os.makedirs(predictions_dir, exist_ok=True)
 
 # Prepare
 # Replace your API key here
-apiKey = "9b2777f6e63e7fd8"
+apiKey = "fill_in_your_key_here"
 dataname = "PPP_NamePrism.csv"
 colname = "fullname"
 

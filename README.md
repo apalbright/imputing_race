@@ -11,31 +11,22 @@ This repository contains replication materials for the paper "Imputing Race"
 
 1. PPP data
    - Data source: [US Small Business Administration (SBA) - FOIA release (last updated: 10/21/24)](https://data.sba.gov/dataset/ppp-foia)
-   - Raw data exceeds GitHub's file size limits, so it must be downloaded directly from SBA and placed in `Data/raw/`
+   - Raw data exceeds GitHub's file size limits, so it must be downloaded directly from SBA and placed in `Data/raw/PPP`
       - *Raw files are also backed up [on OSF](https://osf.io/bq7n8) in case the SBA link breaks or data is removed*
 
 2. ZIP code-level race composition data
    - Data source: [NHGIS](https://www.nhgis.org/)
-   - ZIP method needs race composition by zip => uses the file `Data/support/nhgis0002_ds267_20235_zcta.csv` 
+   - ZIP method needs race composition by zip => uses the file `Data/raw/geo/nhgis0002_ds267_20235_zcta.csv` 
 
 3. ZIP-to-tract crosswalk
    - Data source: [HUD USER ZIP CODE CROSSWALK FILES](https://www.huduser.gov/portal/datasets/usps_crosswalk.html)
-   - BIFSG method needs zip-track crosswalk => uses the files `Data/support/ZIP_TRACT_122025.xlsx` and `Data/support/ZIP_TRACT_122025_bestres.dta` 
-
-
-Data file structure:
-
-```text
-Data/raw                     downloaded raw PPP data
-Data/interim/processed_PPP/  cleaned PPP, ready to test method
-Data/interim/method_inputs/  method-specific input files
-Data/interim/predictions/    method-specific prediction files
-```
+   - BIFSG method needs zip-track crosswalk => uses the file `Data/raw/geo/ZIP_TRACT_122025.xlsx`  
 
 ---
 
 ### Instructions to replicate everything
 
+0. Download raw PPP data [here](https://data.sba.gov/dataset/ppp-foia) or [here](https://osf.io/bq7n8) and place in `Data/raw/PPP`
 1. Run `src/00_clean_raw_PPP.py` *(Python)* to merge raw PPP files, filter person names, parse borrower names, and generate cleaned data
 2. Run `src/01_clean_prep_PPP.do` *(Stata)* to set paths, clean the parsed PPP borrower file, and set up data for all imputation methods
 3. Run `src/02_predict_PPP.Rmd` *(R)* to run all imputation methods that use R *(surname, BISG, BIFSG, BIRDiE)*

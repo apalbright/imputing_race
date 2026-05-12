@@ -15,10 +15,12 @@ This repository contains replication materials for the paper "Imputing Race"
       - *Raw files are also backed up [on OSF](https://osf.io/bq7n8) in case the SBA link breaks or data is removed*
 
 2. ZIP code-level race composition data
-   - The PPP ZIP benchmark uses the tracked support file `Data/support/nhgis0002_ds267_20235_zcta.csv`. Data source: [NHGIS](https://www.nhgis.org/)
+   - Data source: [NHGIS](https://www.nhgis.org/)
+   - ZIP method needs race composition by zip => uses the file `Data/support/nhgis0002_ds267_20235_zcta.csv` 
 
 3. ZIP-to-tract crosswalk
-   - The PPP BIFSG workflow uses the tracked support files `Data/support/ZIP_TRACT_122025.xlsx` and `Data/support/ZIP_TRACT_122025_bestres.dta`. Data source: [HUD USER ZIP CODE CROSSWALK FILES](https://www.huduser.gov/portal/datasets/usps_crosswalk.html)
+   - Data source: [HUD USER ZIP CODE CROSSWALK FILES](https://www.huduser.gov/portal/datasets/usps_crosswalk.html)
+   - BIFSG method needs zip-track crosswalk => uses the files `Data/support/ZIP_TRACT_122025.xlsx` and `Data/support/ZIP_TRACT_122025_bestres.dta` 
 
 
 Data file structure:

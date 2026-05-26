@@ -1,6 +1,6 @@
 # Replication Package for "Imputing Race"
 
-This repository contains replication materials for the paper "Imputing Race" 
+This repository contains replication materials for the paper ["Imputing Race"](https://apalbright.github.io/pdfs/papers/imputing-race.pdf) 
 - Paper authors: [Alex Albright](https://www.albrightalex.com/) and [Juliana Gamboa-Arbelaez](https://sites.google.com/view/juliana-gamboa-arbelaez/home)
 - Paper date: May 2026
 

@@ -2,7 +2,7 @@
 
 This repository contains replication materials for the paper "Imputing Race" 
 - Paper authors: [Alex Albright](https://www.albrightalex.com/) and [Juliana Gamboa-Arbelaez](https://sites.google.com/view/juliana-gamboa-arbelaez/home)
-- Paper date: **May 2026**
+- Paper date: May 2026
 
 ---
 

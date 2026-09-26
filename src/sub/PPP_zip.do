@@ -43,7 +43,7 @@ keep geo_id total_pop white_pop black_pop american_indian_pop asian_pop pacific_
 compress
 
 egen total_asian=rowtotal(asian_pop pacific_islander_pop)
-egen total_other=rowtotal(other_pop two* american_indian_pop)
+egen total_other=rowtotal(other_pop two_pop american_indian_pop)
 
 gen percent_white=(white_pop/total_pop)*100
 gen percent_black=(black_pop/total_pop)*100
